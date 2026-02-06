@@ -27,27 +27,33 @@ st.set_page_config(
     layout="wide"
 )
 
-# ============================================================================
-# CHARGEMENT DONNÉES
-# ============================================================================
+from pathlib import Path
 
-@st.cache_resource
+BASE_DIR = Path(__file__).resolve().parent
+DATA_PATH = BASE_DIR / "data" / "urgences_2012_2016_mensuel.csv"
+
+# ============================================================
+# CHARGEMENT DONNÉES
+# ============================================================
+
+@st.cache_data
 def load_data():
     """Charge et prépare le DataFrame."""
-    df = pd.read_csv('urgences_2012_2016_mensuel.csv', sep=';', decimal='.')
+    df = pd.read_csv(DATA_PATH, sep=';', decimal='.')
     df['date'] = pd.to_datetime(df['date'], format='%d/%m/%Y')
     df = df.sort_values('date').reset_index(drop=True)
-    
+
     # Features temporelles
     df['Année'] = df['date'].dt.year
     df['Mois'] = df['date'].dt.month
     df['Trimestre'] = df['date'].dt.quarter
     df['Mois_Nom'] = df['date'].dt.strftime('%B')
     df['Taux_Occupation'] = df['Passages_Urgences'] / df['Lits_Theoriques']
-    
+
     return df
 
 df = load_data()
+
 
 # ============================================================================
 # FONCTIONS DE SIMULATION CRISE SANITAIRE
